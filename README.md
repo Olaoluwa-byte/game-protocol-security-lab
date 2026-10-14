@@ -1,5 +1,7 @@
 # Game Server Protocol Lab
 
+Licensed under the [MIT License](LICENSE). Copyright (c) 2026 Samson Amosu.
+
 A home-lab project that builds a small multiplayer backend from scratch (master/directory server, game server, client) over a custom binary UDP protocol, then uses it to practice protocol analysis, service emulation, and detection engineering.
 
 The lab protocol and implementations are original project work. Phase 2 treats the project's own black-box executables as opaque inputs; no vendor firmware, game binaries, game assets, or commercial-service protocol is required. The goal is defensive protocol analysis and detection engineering in a self-owned, isolated environment.
