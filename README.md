@@ -9,7 +9,7 @@ Everything here is original code with a protocol I designed. No vendor firmware,
 | Phase | Scope | State |
 |---|---|---|
 | 1 | Build the stack: protocol, master server, game server, client, Wireshark dissector | Complete |
-| 2 | Reverse the protocol from packet captures alone; write a clean-room master server | Planned |
+| 2 | Reverse the protocol from packet captures alone; write a clean-room master server | Complete |
 | 3 | Forward server logs to Splunk; build detections for abuse of the protocol | Planned |
 
 ## Architecture
@@ -119,8 +119,98 @@ The credentials in this repo (`player1` / `labdemo-only`) exist only in this lab
 
 ## Roadmap
 
-Phase 2 treats the captures as an unknown protocol: document offsets, types, and the handshake from packets alone, then write a clean-room master server and confirm the original client works against it.
+Phase 2 is complete: the unknown protocol was reconstructed from packet captures, and the clean-room master server passed all four black-box client compatibility scenarios.
 
 Phase 3 forwards the servers' logs to Splunk and builds detections for brute-force authentication, multi-IP logins per account, lobby flooding, unauthenticated game joins, and concurrent sessions per account.
 
 Stretch: add TLS to the auth path and practice interception against a self-issued certificate.
+
+## Phase 2 — Black-Box Protocol Reverse Engineering
+
+Phase 2 uses a separate, self-owned black-box UDP protocol. The original Python bytecode files are treated as opaque executables: they are run to generate network traffic, but never opened, decompiled, or disassembled.
+
+The protocol was reconstructed using seven controlled Wireshark captures, known client inputs, packet comparisons, and black-box compatibility testing.
+
+### Phase 2 architecture
+
+| Component | Host | Port |
+|---|---|---|
+| Original black-box client | `lab-client` — `192.168.252.3` | Ephemeral UDP |
+| Clean-room master | `lab-master` — `192.168.252.2` | UDP 7777 |
+| Game-server endpoint returned by JOIN | `lab-game` — `192.168.252.4` | UDP 10000 |
+
+Phase 1 remains a separate implementation using UDP 9999. Its packet format and Wireshark dissector should not be assumed to decode the Phase 2 protocol.
+
+### Recovered packet format
+
+| Offset | Size | Field |
+|---|---|---|
+| 0–1 | 2 bytes | Magic: `c0 9e` |
+| 2 | 1 byte | Stage/counter |
+| 3 | 1 byte | Opcode |
+| 4–5 | 2 bytes | Body length, unsigned little-endian |
+| 6 onward | Variable | Message body |
+| Final byte | 1 byte | Additive checksum |
+
+The checksum is `sum(header + body) & 0xff`. This rule matched all 64 captured packets, and the clean-room parser/builder passed 64/64 packet round-trip tests.
+
+### Recovered message types
+
+| Request | Response | Purpose |
+|---|---|---|
+| `0x21` | `0xA1` | HELLO / handshake |
+| `0x22` | `0xA2` | Authentication |
+| `0x23` | `0xA3` | Create lobby |
+| `0x24` | `0xA4` | List lobbies |
+| `0x25` | `0xA5` | Join lobby |
+
+The server supplies a four-byte key during the HELLO exchange. Password bytes are XORed with this key repeatedly before transmission. Successful authentication returns an eight-byte session token used by subsequent lobby requests.
+
+The XOR transformation is reversible and does not provide password confidentiality. The additive checksum is not cryptographic integrity protection.
+
+### Running the clean-room master
+
+From the repository root on the Mac host:
+
+```bash
+multipass transfer phase2/cleanroom_master.py lab-master:
+multipass exec lab-master -- python3 cleanroom_master.py --serve 192.168.252.4
+```
+
+Ensure that the original black-box master is stopped before launching the clean-room master, because both use UDP port 7777.
+
+In another terminal, run the original black-box client against `lab-master`:
+
+```bash
+multipass exec lab-client -- python3 bb_client.pyc 192.168.252.2 player1 labdemo-only
+```
+
+The `.pyc` black-box executables are not included in the repository.
+
+### Compatibility validation
+
+All four required scenarios passed against the original black-box client, with the clean-room server running on `lab-master`.
+
+| Scenario | Expected result | Observed result |
+|---|---|---|
+| `player1 labdemo-only` | `SUCCESS` | PASS |
+| `player2 labdemo-two` | `SUCCESS` | PASS |
+| `player1 wrongpass` | `login failed` | PASS |
+| `player1 labdemo-only tiny 0` | `join refused` | PASS |
+
+The four scenarios were rerun successfully after refactoring opcode dispatch and making the game-server IP configurable.
+
+### Phase 2 artifacts
+
+- `phase2/cleanroom_master.py` — clean-room protocol emulator
+- `phase2/protocol-notes.md` — protocol findings, evidence, confidence levels, and limitations
+- `phase2/captures/p2-01.pcapng` through `p2-07.pcapng` — controlled packet captures
+- `phase2/p2-XX-payloads.txt` and `phase2/p2-XX.hex` — extracted packet evidence
+
+### Limitations and future work
+
+The clean-room server is a lab prototype, not a production authentication service. It uses hardcoded lab credentials, in-memory lobby state, and the recovered protocol's reversible password obfuscation.
+
+The stage field's behavior outside the observed request sequence has not been independently confirmed against the original black-box server. Additional malformed-packet, replay, token-reuse, and capacity tests are future work.
+
+Phase 3 will use these findings to develop Splunk detections and investigate protocol abuse in the isolated lab environment.
