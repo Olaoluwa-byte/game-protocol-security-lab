@@ -1,0 +1,10 @@
+# D3a — Multiple successful authentications from distinct endpoints
+# Logic: One account authenticates successfully from at least two source ports in a 10-minute bin.
+# Threshold: 2 source ports / 10m / user_ref (lab-tuned, per src_ip)
+# Confidence: High
+# ATT&CK: none   CWE: none
+# Validated: 2026-10-14 — positive fired (2 endpoints), negative silent, isolated case windows
+index=c09 event=auth outcome=success
+| bin _time span=10m
+| stats dc(src_port) as endpoints values(src_ip) as src_ip by _time, user_ref
+| where endpoints >= 2

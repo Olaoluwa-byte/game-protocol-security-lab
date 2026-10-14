@@ -1,0 +1,10 @@
+# D6 — Lobby creation burst
+# Logic: At least ten lobby creations from one source IP in a 1-minute bin.
+# Threshold: 10 creates / 1m / src_ip (lab-tuned, per src_ip)
+# Confidence: Medium
+# ATT&CK: T1499.003 (conditional)   CWE: CWE-770
+# Validated: 2026-10-14 — positive fired (15 creates), negative silent, isolated case windows
+index=c09 event=lobby_create
+| bin _time span=1m
+| stats count by _time, src_ip
+| where count >= 10

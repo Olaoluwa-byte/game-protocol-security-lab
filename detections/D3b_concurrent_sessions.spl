@@ -1,0 +1,16 @@
+# D3b — Probable concurrent game sessions for one account
+# Logic: Per account (user_ref carried from auth success onto that endpoint's game events), running count of live sessions (+1 player_join, -1 player_timeout); fires when a join pushes an account to >=2 concurrent sessions.
+# Threshold: 2 concurrent sessions / account within 10m search (lab-tuned, per src_ip)
+# Confidence: Probabilistic
+# ATT&CK: none   CWE: none
+# Validated: 2026-10-14 — positive fired (live_sessions=2), negative silent, isolated case windows.
+index=c09 (event=auth OR event=join_handoff OR event=player_join OR event=player_timeout)
+| sort 0 _time
+| eval ep=src_ip."|".src_port
+| eval ur=if(event=="auth" AND outcome=="success", user_ref, null())
+| streamstats current=t latest(ur) as acct by ep
+| where isnotnull(acct) AND (event=="player_join" OR event=="player_timeout")
+| eval delta=case(event=="player_join",1,event=="player_timeout",-1,true(),0)
+| streamstats current=t sum(delta) as live_sessions by acct
+| where event=="player_join" AND live_sessions>=2
+| table _time, acct, ep, live_sessions

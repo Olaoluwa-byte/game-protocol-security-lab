@@ -10,7 +10,7 @@ Everything here is original code with a protocol I designed. No vendor firmware,
 |---|---|---|
 | 1 | Build the stack: protocol, master server, game server, client, Wireshark dissector | Complete |
 | 2 | Reverse the protocol from packet captures alone; write a clean-room master server | Complete |
-| 3 | Forward server logs to Splunk; build detections for abuse of the protocol | Planned |
+| 3 | Forward server logs to Splunk; build detections for abuse of the protocol | Pipeline live; isolated detection scenarios validated; package schedules disabled |
 
 ## Architecture
 
@@ -123,7 +123,7 @@ The credentials in this repo (`player1` / `labdemo-only`) exist only in this lab
 
 Phase 2 is complete: the unknown protocol was reconstructed from packet captures, and the clean-room master server passed all four black-box client compatibility scenarios.
 
-Phase 3 forwards the servers' logs to Splunk and builds detections for brute-force authentication, multi-IP logins per account, lobby flooding, unauthenticated game joins, and concurrent sessions per account.
+Phase 3 forwards server telemetry to Splunk and packages detections for password guessing and spraying, multiple authentication endpoints, probable concurrent sessions, unauthenticated actions, and lobby creation bursts.
 
 Stretch: add TLS to the auth path and practice interception against a self-issued certificate.
 
@@ -215,7 +215,7 @@ The clean-room server is a lab prototype, not a production authentication servic
 
 The stage field's behavior outside the observed request sequence has not been independently confirmed against the original black-box server. Additional malformed-packet, replay, token-reuse, and capacity tests are future work.
 
-Phase 3 will use these findings to develop Splunk detections and investigate protocol abuse in the isolated lab environment.
+Phase 3 uses these findings to develop Splunk detections and investigate protocol abuse in the isolated lab environment.
 
 ## Changelog
 
@@ -225,6 +225,7 @@ Phase 3 will use these findings to develop Splunk detections and investigate pro
 | v1.1 | Wireshark game-protocol dissector for UDP 10000. |
 | v2.0 | Phase 2 clean-room master, recovered protocol notes and capture evidence, and four passing black-box client compatibility scenarios. |
 | v2.1 | Docs: emulator design decisions, client-validation findings, known logging limitation, and Phase 1 multiplayer capture. |
+| v3.0 | Live JSONL telemetry pipeline, real-server attack generators, and seven detection scenarios with isolated-window validation; Splunk detection package with schedules disabled and corrected, validated D3b account correlation. |
 
 ## Phase 3 telemetry
 
@@ -255,4 +256,40 @@ python3 src/gameserver.py --host-ip 192.168.252.4 --log-path /mnt/c09logs/gamese
 Retain the same key across restarts. For manual rotation, generate a new key and
 change its label to `k2` (then `k3`, etc.); record each rotation boundary and compare
 `user_ref` values only within one `user_ref_key_id`. Monitor only the `.jsonl`
-files for future forwarding; interactive console output remains separate.
+files for forwarding; interactive console output remains separate.
+
+## Phase 3 — Detection engineering
+
+The live telemetry pipeline carries server **JSONL → Universal Forwarder over
+Tailscale → Splunk index `c09`**. The
+[telemetry schema](docs/telemetry-schema.md) defines the allowlisted fields;
+[detections/](detections/) packages seven searches, with a
+[Splunk app](splunk/c09_detections/) whose schedules are intentionally disabled
+pending the Developer license. [Attack generators](phase3/attack/) drive real
+protocol traffic. The lab operator reports positive-fired/negative-silent checks
+on 2026-10-14 against isolated case windows.
+
+- **D1 — Password guessing:** flags five or more failed authentications for one
+  account and source endpoint in a five-minute bucket.
+- **D2 — Password spraying:** flags failures for five or more distinct accounts
+  from one source IP in a five-minute bucket.
+- **D3a — Multiple endpoint authentication:** flags successful authentication for
+  one account from two or more source ports in a ten-minute bucket.
+- **D3b — Probable concurrent sessions:** carries successful auth account identity
+  onto endpoint game events and flags a join that raises the account's running
+  live-session count to two or more; the corrected SPL passed isolated validation.
+- **D4 — Game join without handoff:** flags a game join without a matching source
+  endpoint handoff observed during the prior five minutes.
+- **D5 — Unauthenticated master action:** flags lobby creation or handoff with
+  telemetry reporting no prior successful authentication at that endpoint.
+- **D6 — Lobby creation burst:** flags ten or more lobby creations from one source
+  IP in a one-minute bucket.
+
+Key security findings are credentials exposed by cleartext Phase 1 AUTH or
+reversible Phase 2 XOR obfuscation (**T1040**, Network Sniffing), unauthenticated
+master/game actions (**CWE-306**), and unbounded lobby growth (**CWE-770**).
+Passive credential sniffing is a protocol finding, not a detection established
+by server JSONL alone. D6 maps conditionally to T1499.003; a creation burst is not
+proof of denial of service. Production D3b/D4 correlation remains heuristic
+because there is no shared protocol identity. See the detection README for the
+scope of validation and correlation limitations.

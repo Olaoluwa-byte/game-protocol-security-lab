@@ -1,0 +1,8 @@
+# D5 — Master action without prior authentication
+# Logic: Lobby creation or handoff is observed with authenticated=false.
+# Threshold: 1 unauthenticated action / 5m search / source endpoint (lab-tuned, per src_ip)
+# Confidence: High
+# ATT&CK: none   CWE: CWE-306
+# Validated: 2026-10-14 — positive fired (1 unauthenticated action), negative silent, isolated case windows
+index=c09 (event=lobby_create OR event=join_handoff) authenticated=false
+| table _time, event, src_ip, src_port, lobby_id
