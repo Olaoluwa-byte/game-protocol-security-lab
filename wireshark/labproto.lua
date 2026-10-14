@@ -1,5 +1,7 @@
--- labproto.lua - Wireshark dissector for the C09 lab master protocol (UDP 9999)
--- Header: version(1) | msg_type(1) | body_length(2, big-endian) | body
+-- labproto.lua - Wireshark dissectors for the C09 lab protocols
+--   labproto  : master protocol (UDP 9999)
+--   labgame   : game protocol   (UDP 10000)
+-- Shared header: version(1) | msg_type(1) | body_length(2, big-endian) | body
 
 local p = Proto("labproto", "Lab Master Protocol")
 
@@ -117,3 +119,82 @@ function p.dissector(buf, pinfo, tree)
 end
 
 DissectorTable.get("udp.port"):add(9999, p)
+
+
+-- =====================================================================
+-- Game protocol (UDP 10000)
+-- =====================================================================
+
+local g = Proto("labgame", "Lab Game Protocol")
+
+local gtypes = {
+    [1] = "G_JOIN", [2] = "G_JOIN_ACK",
+    [3] = "G_STATE", [4] = "G_SNAPSHOT",
+}
+
+local g_ver   = ProtoField.uint8 ("labgame.version",   "Version",      base.DEC)
+local g_type  = ProtoField.uint8 ("labgame.type",      "Msg Type",     base.DEC, gtypes)
+local g_len   = ProtoField.uint16("labgame.length",    "Body Length",  base.DEC)
+local g_pid   = ProtoField.uint32("labgame.player_id", "Player ID",    base.DEC)
+local g_x     = ProtoField.int16 ("labgame.x",         "X",            base.DEC)
+local g_y     = ProtoField.int16 ("labgame.y",         "Y",            base.DEC)
+local g_count = ProtoField.uint8 ("labgame.player_count", "Player Count", base.DEC)
+
+g.fields = { g_ver, g_type, g_len, g_pid, g_x, g_y, g_count }
+
+function g.dissector(buf, pinfo, tree)
+    if buf:len() < 4 then return 0 end
+
+    local mtype = buf(1, 1):uint()
+    local blen  = buf(2, 2):uint()
+    local name  = gtypes[mtype] or ("type " .. mtype)
+    local info  = name
+
+    pinfo.cols.protocol = "LABGAME"
+    local t = tree:add(g, buf(), "Lab Game Protocol, " .. name)
+    t:add(g_ver,  buf(0, 1))
+    t:add(g_type, buf(1, 1))
+    t:add(g_len,  buf(2, 2))
+
+    if buf:len() < 4 + blen then
+        t:append_text(" [truncated]")
+        pinfo.cols.info = info .. " [truncated]"
+        return buf:len()
+    end
+
+    local b = 4
+
+    if mtype == 2 and blen >= 4 then                      -- G_JOIN_ACK
+        t:add(g_pid, buf(b, 4))
+        info = info .. " player_id=" .. buf(b, 4):uint()
+
+    elseif mtype == 3 and blen >= 4 then                  -- G_STATE
+        t:add(g_x, buf(b, 2))
+        t:add(g_y, buf(b + 2, 2))
+        info = info .. " (" .. buf(b, 2):int() .. "," .. buf(b + 2, 2):int() .. ")"
+
+    elseif mtype == 4 and blen >= 1 then                  -- G_SNAPSHOT
+        local cnt = buf(b, 1):uint()
+        t:add(g_count, buf(b, 1))
+        local parts = {}
+        local o = b + 1
+        for _ = 1, cnt do
+            if o + 8 > buf:len() then break end
+            local pid = buf(o, 4):uint()
+            local px, py = buf(o + 4, 2):int(), buf(o + 6, 2):int()
+            local sub = t:add(g, buf(o, 8), "Player " .. pid .. " @ (" .. px .. "," .. py .. ")")
+            sub:add(g_pid, buf(o, 4))
+            sub:add(g_x,   buf(o + 4, 2))
+            sub:add(g_y,   buf(o + 6, 2))
+            parts[#parts + 1] = "p" .. pid .. "(" .. px .. "," .. py .. ")"
+            o = o + 8
+        end
+        info = info .. " count=" .. cnt
+        if #parts > 0 then info = info .. " " .. table.concat(parts, " ") end
+    end
+
+    pinfo.cols.info = info
+    return buf:len()
+end
+
+DissectorTable.get("udp.port"):add(10000, g)
