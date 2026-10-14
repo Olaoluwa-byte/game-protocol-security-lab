@@ -1,0 +1,14 @@
+{"case": "d1_positive", "start": "2026-10-14T21:41:05.393543Z", "end": "2026-10-14T21:41:05.441823Z", "note": "Six failed AUTH_ACKs for one account and endpoint."}
+{"case": "d1_negative", "start": "2026-10-14T21:41:13.451197Z", "end": "2026-10-14T21:41:13.497190Z", "note": "One failed AUTH_ACK followed by a successful AUTH_ACK."}
+{"case": "d2_positive", "start": "2026-10-14T21:41:21.501634Z", "end": "2026-10-14T21:41:21.604104Z", "note": "Six nonexistent accounts fail from one endpoint."}
+{"case": "d2_negative", "start": "2026-10-14T21:41:29.609230Z", "end": "2026-10-14T21:41:29.653074Z", "note": "Three endpoints each fail once for a distinct account."}
+{"case": "d3a_positive", "start": "2026-10-14T21:41:37.653740Z", "end": "2026-10-14T21:41:37.677244Z", "note": "One account authenticates from two distinct endpoints."}
+{"case": "d3a_negative", "start": "2026-10-14T21:41:45.686452Z", "end": "2026-10-14T21:41:45.721724Z", "note": "One account authenticates twice from the same endpoint."}
+{"case": "d3b_positive", "start": "2026-10-14T21:41:53.723183Z", "end": "2026-10-14T21:41:57.187109Z", "note": "Two full game flows for one account overlap with 3 s of activity."}
+{"case": "d3b_negative", "start": "2026-10-14T21:42:05.199620Z", "end": "2026-10-14T21:42:16.483328Z", "note": "First game session waits 11 s to expire before the second starts."}
+{"case": "d4_positive", "start": "2026-10-14T21:42:24.484319Z", "end": "2026-10-14T21:42:24.560511Z", "note": "Direct game join and states; G_JOIN_ACK checked, no master flow."}
+{"case": "d4_negative", "start": "2026-10-14T21:42:32.564965Z", "end": "2026-10-14T21:42:32.712089Z", "note": "Full master handoff and game flow from the same endpoint."}
+{"case": "d5_positive", "start": "2026-10-14T21:42:40.716801Z", "end": "2026-10-14T21:42:40.773275Z", "note": "HELLO then lobby creation without authentication."}
+{"case": "d5_negative", "start": "2026-10-14T21:42:48.775977Z", "end": "2026-10-14T21:42:48.827798Z", "note": "HELLO and successful authentication before lobby creation."}
+{"case": "d6_positive", "start": "2026-10-14T21:42:56.833797Z", "end": "2026-10-14T21:42:57.220711Z", "note": "Fifteen authenticated lobby creates in a burst."}
+{"case": "d6_negative", "start": "2026-10-14T21:43:05.226168Z", "end": "2026-10-14T21:43:07.304737Z", "note": "Three authenticated lobby creates spaced about 1 s apart."}
