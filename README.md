@@ -225,3 +225,34 @@ Phase 3 will use these findings to develop Splunk detections and investigate pro
 | v1.1 | Wireshark game-protocol dissector for UDP 10000. |
 | v2.0 | Phase 2 clean-room master, recovered protocol notes and capture evidence, and four passing black-box client compatibility scenarios. |
 | v2.1 | Docs: emulator design decisions, client-validation findings, known logging limitation, and Phase 1 multiplayer capture. |
+
+## Phase 3 telemetry
+
+The Phase 1 master and game server emit append-only JSONL events using the
+[telemetry schema v1.0](docs/telemetry-schema.md). Authentication state is observed
+for telemetry only; protocol behavior and access controls are unchanged.
+
+Generate the master-only HMAC key in an existing `/etc/c09` directory owned by
+its server account (keep the key outside Git and the log folder):
+
+```bash
+openssl rand -hex 32 > /etc/c09/user_ref.key
+chmod 0400 /etc/c09/user_ref.key
+```
+
+Create the log directories before starting the servers. Both accept `--log-path`
+and `--host-ip` (the address recorded as `dst_ip`, not a bind-address change).
+Without `--host-ip`, hostname resolution supplies the address, with loopback as
+the fallback; specify the lab address explicitly for accurate VM telemetry.
+The master also accepts `--user-ref-key-file` and `--user-ref-key-id` (default `k1`),
+and refuses to start without a readable 256-bit hex key.
+
+```bash
+python3 src/master.py 192.168.252.4 --host-ip 192.168.252.2 --log-path /mnt/c09logs/master.jsonl --user-ref-key-file /etc/c09/user_ref.key --user-ref-key-id k1
+python3 src/gameserver.py --host-ip 192.168.252.4 --log-path /mnt/c09logs/gameserver.jsonl
+```
+
+Retain the same key across restarts. For manual rotation, generate a new key and
+change its label to `k2` (then `k3`, etc.); record each rotation boundary and compare
+`user_ref` values only within one `user_ref_key_id`. Monitor only the `.jsonl`
+files for future forwarding; interactive console output remains separate.
