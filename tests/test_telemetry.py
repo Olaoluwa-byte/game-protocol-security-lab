@@ -132,7 +132,8 @@ class ServerTests(unittest.TestCase):
         if baseline:
             scripts = folder
             for name in ('master.py', 'gameserver.py'):
-                content = subprocess.check_output(['git','show',f'main:src/{name}'], cwd=ROOT)
+                # v2.1 is the immutable pre-telemetry baseline; main moves forward.
+                content = subprocess.check_output(['git','show',f'v2.1:src/{name}'], cwd=ROOT)
                 (folder / name).write_bytes(content)
         processes = []
         for component in ('master', 'gameserver'):

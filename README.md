@@ -2,7 +2,9 @@
 
 A home-lab project that builds a small multiplayer backend from scratch (master/directory server, game server, client) over a custom binary UDP protocol, then uses it to practice protocol analysis, service emulation, and detection engineering.
 
-Everything here is original code with a protocol I designed. No vendor firmware, binaries, game assets, or network captures from commercial services are used. The goal is to learn the skills behind private-server and protocol-reversing work in a fully legal, self-owned environment.
+The lab protocol and implementations are original project work. Phase 2 treats the project's own black-box executables as opaque inputs; no vendor firmware, game binaries, game assets, or commercial-service protocol is required. The goal is defensive protocol analysis and detection engineering in a self-owned, isolated environment.
+
+The deliberately insecure authentication and bounded attack-traffic scenarios are teaching fixtures, not production services. Run them only against lab systems you own or have explicit permission to test. See [security scope and public evidence](SECURITY.md) for limitations, capture handling, and secret-management rules.
 
 ## Status
 
@@ -97,6 +99,10 @@ Run the client in two terminals at once to see two players in the same session.
 The committed [multiplayer capture](captures/phase1-multiplayer.pcapng) provides evidence: filter `labgame.player_count >= 2` to see snapshots containing both players.
 
 ### Capture note (macOS)
+
+Public captures contain only UDP traffic between the three lab VM addresses on ports 7777, 9999, or 10000. The publication cleanup reduced `captures/phase1-game.pcapng` from 2,671 to 330 packets by removing 2,341 unrelated packets. The multiplayer capture retains all 300 packets; the seven Phase 2 captures retain all 128 observations (64 unique packets on interface 1).
+
+All nine captures have capture comments, host/interface descriptions, statistics, and packet options removed. Retained packet bytes, timestamps, lengths, interface IDs, and timestamp resolution are preserved. Filtering renumbers frames in the Phase 1 game capture; older frame numbers refer to the original private capture. Prefer protocol fields or payloads when identifying evidence. Multi-interface duplicate observations remain intentional.
 
 VM-to-VM traffic does not appear on `bridge100`. Multipass VMs attach through `vmenetN` member interfaces, and frames switched between members are not seen on the bridge interface itself. Capture on all `vmenet` interfaces at once with the filter `udp.port == 9999 || udp.port == 10000`.
 
@@ -228,6 +234,13 @@ Phase 3 uses these findings to develop Splunk detections and investigate protoco
 | v3.0 | Live JSONL telemetry pipeline, real-server attack generators, and seven detection scenarios with isolated-window validation; Splunk detection package with schedules disabled and corrected, validated D3b account correlation. |
 
 ## Phase 3 telemetry
+
+### Verification
+
+Run `python3 -m unittest -v` from the repository root with local UDP sockets
+available and ports 9999/10000 free. The compatibility test compares the current
+servers with the pre-telemetry `v2.1` release; clone tags as well as the source.
+Test keys and logs are generated in the operating system's temporary directory.
 
 The Phase 1 master and game server emit append-only JSONL events using the
 [telemetry schema v1.0](docs/telemetry-schema.md). Authentication state is observed

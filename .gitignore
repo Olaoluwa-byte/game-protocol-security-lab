@@ -7,3 +7,16 @@ blackbox/
 
 phase2/captures-original/
 phase2/protocol-notes_orig.md
+
+# Local keys, environment files, and runtime telemetry must stay private.
+*.key
+*.pem
+.env
+.env.*
+!.env.example
+c09-logs/
+*.log
+*.jsonl
+
+# Deliberate public evidence: case names, UTC windows, and notes only.
+!phase3/attack/last_run.jsonl
