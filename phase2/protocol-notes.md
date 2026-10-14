@@ -113,3 +113,15 @@ multipass exec lab-master -- python3 cleanroom_master.py --serve 192.168.252.4
 ```
 
 Then invoke the original client from `lab-client` with the arguments shown in the validation table. No black-box bytecode is committed or required for the clean-room source distribution.
+
+## Emulator design decisions and client-validation findings (v2.1)
+
+| Topic | Emulator behavior / finding | Evidence and limits |
+|---|---|---|
+| Token scope | Tokens are bound to the authenticating client's IP:port. | Design decision. Captures cannot establish the original server's binding behavior because the client reuses one socket. |
+| Connection ID | The clean-room server uses a fixed `0x1000` in the first four HELLO_ACK body bytes. The original produced `0x1000` and `0x1002` (`p2-01 P2`, `p2-03 P2`). | The client completed all four compatibility tests with a repeated `0x1000`, so it does not enforce uniqueness or incrementing in the tested workflow. Arbitrary values and the original field's exact semantics remain untested. |
+| Nonexistent lobby on JOIN | Returns status `04`. | Assumption. `04` was only observed for a full lobby: the zero-capacity `tiny` lobby (`p2-07 P9–P10`); nonexistent IDs and other full-lobby cases were not tested against the original. |
+| Bad magic, length, or checksum | Drops the packet without a protocol response; emits a local diagnostic. | Design decision. The stock client never sends these inputs, so original-server behavior is unobserved. |
+| Missing or invalid token | Drops the request without a protocol response; emits a local diagnostic. | Design decision. Original-server rejection behavior is not observable in the captured client workflow. |
+| Stage values outside 1–5 | Echoes the incoming stage value in the response. | Consistent with the observed echo rule for stages 1–5. Original-server behavior outside that range is untested. |
+| Known logging limitation | `cleanroom_master.py` debug output prints the XOR key, session tokens, raw request bodies (including XOR-encoded passwords), and full responses. | Lab debugging only. This output must be redacted before any clean-room logs are ingested into Splunk. |

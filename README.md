@@ -72,6 +72,7 @@ src/gameserver.py     game server
 src/client.py         test client (full flow: auth, lobby, join, gameplay)
 wireshark/labproto.lua  dissector for the master protocol
 captures/             Phase 1 packet captures
+captures/phase1-multiplayer.pcapng  Phase 1 two-player session evidence
 ```
 
 ## Running it
@@ -93,6 +94,7 @@ multipass exec lab-client -- python3 client.py <lab-master IP> 20
 ```
 
 Run the client in two terminals at once to see two players in the same session.
+The committed [multiplayer capture](captures/phase1-multiplayer.pcapng) provides evidence: filter `labgame.player_count >= 2` to see snapshots containing both players.
 
 ### Capture note (macOS)
 
@@ -113,7 +115,7 @@ Reload with Cmd+Shift+L. Useful filters: `labproto.type == 3` (AUTH), `labproto.
 |---|---|---|
 | Cleartext credentials | AUTH sends username and password unencrypted. The `labproto.password` filter recovers them from any capture on the path. | MITRE T1040 Network Sniffing |
 | Unauthenticated game join | The game server accepts `G_JOIN` from any address. A client can skip the master entirely if it knows the game server's address. | Detection candidate for Phase 3 |
-| Concurrent sessions | The same account can authenticate and hold two live game sessions at once. | Detection candidate for Phase 3 (session hijack / credential sharing) |
+| Concurrent sessions | The same account can authenticate and hold two live game sessions at once. Evidence: [multiplayer capture](captures/phase1-multiplayer.pcapng), filter `labgame.player_count >= 2`. | Detection candidate for Phase 3 (session hijack / credential sharing) |
 
 The credentials in this repo (`player1` / `labdemo-only`) exist only in this lab.
 
@@ -214,3 +216,12 @@ The clean-room server is a lab prototype, not a production authentication servic
 The stage field's behavior outside the observed request sequence has not been independently confirmed against the original black-box server. Additional malformed-packet, replay, token-reuse, and capacity tests are future work.
 
 Phase 3 will use these findings to develop Splunk detections and investigate protocol abuse in the isolated lab environment.
+
+## Changelog
+
+| Version | Changes |
+|---|---|
+| v1.0 | Phase 1 master and game servers, client, Wireshark master-protocol dissector, and captures. |
+| v1.1 | Wireshark game-protocol dissector for UDP 10000. |
+| v2.0 | Phase 2 clean-room master, recovered protocol notes and capture evidence, and four passing black-box client compatibility scenarios. |
+| v2.1 | Docs: emulator design decisions, client-validation findings, known logging limitation, and Phase 1 multiplayer capture. |
