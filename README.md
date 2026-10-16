@@ -32,9 +32,11 @@ Forwarder → Tailscale → Splunk pipeline with seven packaged detections.
    assumptions that hold in this lab.
 
 **Outcome.** Released v3.0: a working telemetry pipeline and seven detection
-scenarios reported validated with positive-fired/negative-silent checks. The
-Splunk app is deployable with **scheduling disabled**; v3.1 scheduled alerts remain
-deferred pending the Developer license.
+scenarios reported validated with positive-fired/negative-silent checks. The v3.0
+Splunk app shipped with scheduling disabled. On this implementation branch,
+C09-ALERTS-01 enables seven locally tracked schedules under the Developer license;
+runtime validation is recorded; independent review, user acceptance and the v3.1 release remain separate.
+See [the validation record](docs/c09-alerts-01-validation.md).
 
 ### Results
 
@@ -46,7 +48,7 @@ deferred pending the Developer license.
 | Telemetry verification | **9/9** local automated tests pass; includes allowlists, HMAC, canary privacy, and wire behavior |
 | Detection validation | **7 scenarios** reported validated in Splunk against isolated positive/negative case windows |
 | Public packet evidence | Nine sanitized captures; unrelated traffic removed and retained packet bytes/timing preserved |
-| Alert scheduling | **Disabled** in every packaged search; no scheduled-alert completion claim |
+| Alert scheduling | Enabled in current source under C09-ALERTS-01; see runtime validation record; v3.1 not released |
 
 ### Coverage & Limitations
 
@@ -57,7 +59,7 @@ deferred pending the Developer license.
 | HMAC key rotation | Supplied account searches do not group by key generation; avoid mixing rotations in a window |
 | Validation scope | Live Splunk checks are operator-reported; the nine Python tests are telemetry tests, not a Splunk CI suite |
 | Black-box executables | Intentionally excluded; captures and notes are public, but original-client replay needs the private lab files |
-| Scheduled alerts | Deferred to v3.1; current cron settings express intent only |
+| Scheduled alerts | Current branch enables local tracking; runtime acceptance and v3.1 release require evidence and review |
 
 ### Framework Mapping
 
@@ -81,7 +83,7 @@ deferred pending the Developer license.
 |---|---|---|
 | 1 | Build the stack: protocol, master server, game server, client, Wireshark dissector | Complete |
 | 2 | Reverse the protocol from packet captures alone; write a clean-room master server | Complete |
-| 3 | Forward server logs to Splunk; build detections for abuse of the protocol | Pipeline live; isolated detection scenarios validated; package schedules disabled |
+| 3 | Forward server logs to Splunk; build detections for abuse of the protocol | Pipeline live; detection scenarios previously validated; scheduled-alert runtime validation recorded; review pending |
 
 Three Ubuntu 24.04 VMs on Multipass (Apple Silicon Mac), on a shared bridge network. Wireshark runs on the host.
 
@@ -296,8 +298,8 @@ The live telemetry pipeline carries server **JSONL → Universal Forwarder over
 Tailscale → Splunk index `c09`**. The
 [telemetry schema](docs/telemetry-schema.md) defines the allowlisted fields;
 [detections/](detections/) packages seven searches, with a
-[Splunk app](splunk/c09_detections/) whose schedules are intentionally disabled
-pending the Developer license. [Attack generators](phase3/attack/) drive real
+[Splunk app](splunk/c09_detections/) whose current branch enables locally tracked schedules
+under C09-ALERTS-01; see its runtime validation record. [Attack generators](phase3/attack/) drive real
 protocol traffic. The lab operator reports positive-fired/negative-silent checks
 on 2026-10-14 against isolated case windows.
 
@@ -437,7 +439,7 @@ account for session timeout tails. See the [generator instructions](phase3/attac
 
 For manual Splunk validation, use [the seven searches](detections/), removing
 leading `#` documentation lines before pasting SPL. For deployment, follow the
-[Splunk app instructions](splunk/c09_detections/README.md); schedules remain off.
+[Splunk app instructions](splunk/c09_detections/README.md); current source enables schedules; verify deployment and runtime acceptance.
 
 </details>
 
@@ -460,7 +462,7 @@ phase2/                     clean-room server, protocol notes, captures, and pay
 docs/telemetry-schema.md    common fields, per-event allowlists, privacy rules
 detections/                 seven SPL searches and validation/limitation notes
 phase3/attack/              real-server scenario generators and case-window metadata
-splunk/c09_detections/      deployable Splunk app; all schedules disabled
+splunk/c09_detections/      scheduled Splunk alerts; local tracking only
 tests/test_telemetry.py     nine local telemetry and wire-behavior tests
 SECURITY.md                lab scope, public artifacts, and private-material rules
 LICENSE                    MIT License
@@ -481,7 +483,7 @@ LICENSE                    MIT License
 
 ### Next steps
 
-- **v3.1:** enable and validate scheduled alerts after the Developer license is available.
+- **v3.1:** complete independent review of the validated scheduled-alert implementation, then obtain the user’s acceptance and release decision. The Developer license is installed; C09-ALERTS-01 enables schedules in current source.
 - Preserve the documented correlation and threshold limitations when extending detections.
 
 ### Original roadmap and stretch work

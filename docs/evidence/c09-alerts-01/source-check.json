@@ -1,0 +1,16 @@
+{
+  "base": "85ec9590ba73f5b31e1736277ba0251e62bd5e28",
+  "config_sha256": "745de3e4474a9174642a6eaa38e6f6947843d4505b76e5ef799a4aaf990620f1",
+  "stanzas": [
+    "D1_password_guessing",
+    "D2_password_spraying",
+    "D3a_multi_endpoint_auth",
+    "D3b_concurrent_sessions",
+    "D4_unauth_game_join",
+    "D5_unauth_master_action",
+    "D6_lobby_creation_burst"
+  ],
+  "spl_windows_cron_unchanged": true,
+  "count_trigger_and_tracking": true,
+  "outbound_notification_actions_disabled": true
+}
