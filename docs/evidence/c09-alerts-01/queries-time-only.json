@@ -1,0 +1,366 @@
+{
+  "captured_epoch": 1792165756.4009852,
+  "cases": [
+    {
+      "case": {
+        "case": "d3a_negative",
+        "start": 1792164875.546166,
+        "end": 1792164875.586272,
+        "expected_rows": 0
+      },
+      "stanza": "D3a_multi_endpoint_auth",
+      "earliest": 1792164874,
+      "latest": 1792164877,
+      "query": "index=c09 earliest=1792164874 latest=1792164877 event=auth outcome=success | bin _time span=10m | stats dc(src_port) as endpoints values(src_ip) as src_ip by _time, user_ref | where endpoints >= 2",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [],
+      "row_count": 0
+    },
+    {
+      "case": {
+        "case": "d1_negative",
+        "start": 1792165253.422679,
+        "end": 1792165253.621401,
+        "expected_rows": 0
+      },
+      "stanza": "D1_password_guessing",
+      "earliest": 1792165252,
+      "latest": 1792165255,
+      "query": "index=c09 earliest=1792165252 latest=1792165255 event=auth outcome=failure | bin _time span=5m | stats count by _time, src_ip, src_port, user_ref | where count >= 5",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [],
+      "row_count": 0
+    },
+    {
+      "case": {
+        "case": "d2_negative",
+        "start": 1792165253.621817,
+        "end": 1792165253.6267562,
+        "expected_rows": 0
+      },
+      "stanza": "D2_password_spraying",
+      "earliest": 1792165252,
+      "latest": 1792165255,
+      "query": "index=c09 earliest=1792165252 latest=1792165255 event=auth outcome=failure | bin _time span=5m | stats dc(user_ref) as accounts by _time, src_ip | where accounts >= 5",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [],
+      "row_count": 0
+    },
+    {
+      "case": {
+        "case": "d3b_negative",
+        "start": 1792165253.6270661,
+        "end": 1792165265.388441,
+        "expected_rows": 0
+      },
+      "stanza": "D3b_concurrent_sessions",
+      "earliest": 1792165223,
+      "latest": 1792165281,
+      "query": "index=c09 earliest=1792165223 latest=1792165281 (event=auth OR event=join_handoff OR event=player_join OR event=player_timeout) | sort 0 _time | eval ep=src_ip.\"|\".src_port | eval ur=if(event==\"auth\" AND outcome==\"success\", user_ref, null()) | streamstats current=t latest(ur) as acct by ep | where isnotnull(acct) AND (event==\"player_join\" OR event==\"player_timeout\") | eval delta=case(event==\"player_join\",1,event==\"player_timeout\",-1,true(),0) | streamstats current=t sum(delta) as live_sessions by acct | where event==\"player_join\" AND live_sessions>=2 | table _time, acct, ep, live_sessions",
+      "returncode": 0,
+      "stdout": "\"_time\",acct,ep,\"live_sessions\"\n\"2026-10-16 11:41:05.494 EDT\",\"hmac-sha256:bcc05b0d9099ce77f464fb4659eb8ca4\",\"192.168.252.1|53466\",2\n",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [
+        {
+          "_time": "2026-10-16 11:41:05.494 EDT",
+          "acct": "hmac-sha256:bcc05b0d9099ce77f464fb4659eb8ca4",
+          "ep": "192.168.252.1|53466",
+          "live_sessions": "2"
+        }
+      ],
+      "row_count": 1
+    },
+    {
+      "case": {
+        "case": "d4_negative",
+        "start": 1792165265.389662,
+        "end": 1792165265.517649,
+        "expected_rows": 0
+      },
+      "stanza": "D4_unauth_game_join",
+      "earliest": 1792164964,
+      "latest": 1792165267,
+      "query": "index=c09 earliest=1792164964 latest=1792165267 (event=join_handoff OR event=player_join) | sort 0 _time | eval ep=src_ip.\"|\".src_port | streamstats time_window=5m current=t latest(eval(if(event==\"join_handoff\",_time,null()))) as last_handoff by ep | where event==\"player_join\" AND (isnull(last_handoff) OR last_handoff < (_time - 300)) | table _time, src_ip, src_port",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [],
+      "row_count": 0
+    },
+    {
+      "case": {
+        "case": "d5_negative",
+        "start": 1792165265.518126,
+        "end": 1792165265.5466812,
+        "expected_rows": 0
+      },
+      "stanza": "D5_unauth_master_action",
+      "earliest": 1792165264,
+      "latest": 1792165267,
+      "query": "index=c09 earliest=1792165264 latest=1792165267 (event=lobby_create OR event=join_handoff) authenticated=false | table _time, event, src_ip, src_port, lobby_id",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [],
+      "row_count": 0
+    },
+    {
+      "case": {
+        "case": "d6_negative",
+        "start": 1792165265.5469272,
+        "end": 1792165267.6291468,
+        "expected_rows": 0
+      },
+      "stanza": "D6_lobby_creation_burst",
+      "earliest": 1792165264,
+      "latest": 1792165269,
+      "query": "index=c09 earliest=1792165264 latest=1792165269 event=lobby_create | bin _time span=1m | stats count by _time, src_ip | where count >= 10",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [],
+      "row_count": 0
+    },
+    {
+      "case": {
+        "case": "d1_positive",
+        "start": 1792165681.6611378,
+        "end": 1792165681.793778,
+        "expected_min_rows": 1
+      },
+      "stanza": "D1_password_guessing",
+      "earliest": 1792165680,
+      "latest": 1792165683,
+      "query": "index=c09 earliest=1792165680 latest=1792165683 event=auth outcome=failure | bin _time span=5m | stats count by _time, src_ip, src_port, user_ref | where count >= 5",
+      "returncode": 0,
+      "stdout": "\"_time\",\"src_ip\",\"src_port\",\"user_ref\",count\n\"2026-10-16 11:45:00.000 EDT\",\"192.168.252.1\",58635,\"hmac-sha256:bcc05b0d9099ce77f464fb4659eb8ca4\",6\n",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [
+        {
+          "_time": "2026-10-16 11:45:00.000 EDT",
+          "src_ip": "192.168.252.1",
+          "src_port": "58635",
+          "user_ref": "hmac-sha256:bcc05b0d9099ce77f464fb4659eb8ca4",
+          "count": "6"
+        }
+      ],
+      "row_count": 1
+    },
+    {
+      "case": {
+        "case": "d2_positive",
+        "start": 1792165681.794765,
+        "end": 1792165681.803893,
+        "expected_min_rows": 1
+      },
+      "stanza": "D2_password_spraying",
+      "earliest": 1792165680,
+      "latest": 1792165683,
+      "query": "index=c09 earliest=1792165680 latest=1792165683 event=auth outcome=failure | bin _time span=5m | stats dc(user_ref) as accounts by _time, src_ip | where accounts >= 5",
+      "returncode": 0,
+      "stdout": "\"_time\",\"src_ip\",accounts\n\"2026-10-16 11:45:00.000 EDT\",\"192.168.252.1\",7\n",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [
+        {
+          "_time": "2026-10-16 11:45:00.000 EDT",
+          "src_ip": "192.168.252.1",
+          "accounts": "7"
+        }
+      ],
+      "row_count": 1
+    },
+    {
+      "case": {
+        "case": "d3a_positive",
+        "start": 1792165681.804102,
+        "end": 1792165681.8289,
+        "expected_min_rows": 1
+      },
+      "stanza": "D3a_multi_endpoint_auth",
+      "earliest": 1792165680,
+      "latest": 1792165683,
+      "query": "index=c09 earliest=1792165680 latest=1792165683 event=auth outcome=success | bin _time span=10m | stats dc(src_port) as endpoints values(src_ip) as src_ip by _time, user_ref | where endpoints >= 2",
+      "returncode": 0,
+      "stdout": "\"_time\",\"user_ref\",endpoints,\"src_ip\"\n\"2026-10-16 11:40:00.000 EDT\",\"hmac-sha256:bcc05b0d9099ce77f464fb4659eb8ca4\",3,\"192.168.252.1\"\n",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [
+        {
+          "_time": "2026-10-16 11:40:00.000 EDT",
+          "user_ref": "hmac-sha256:bcc05b0d9099ce77f464fb4659eb8ca4",
+          "endpoints": "3",
+          "src_ip": "192.168.252.1"
+        }
+      ],
+      "row_count": 1
+    },
+    {
+      "case": {
+        "case": "d4_positive",
+        "start": 1792165681.829375,
+        "end": 1792165682.0491111,
+        "expected_min_rows": 1
+      },
+      "stanza": "D4_unauth_game_join",
+      "earliest": 1792165380,
+      "latest": 1792165684,
+      "query": "index=c09 earliest=1792165380 latest=1792165684 (event=join_handoff OR event=player_join) | sort 0 _time | eval ep=src_ip.\"|\".src_port | streamstats time_window=5m current=t latest(eval(if(event==\"join_handoff\",_time,null()))) as last_handoff by ep | where event==\"player_join\" AND (isnull(last_handoff) OR last_handoff < (_time - 300)) | table _time, src_ip, src_port",
+      "returncode": 0,
+      "stdout": "\"_time\",\"src_ip\",\"src_port\"\n\"2026-10-16 11:48:01.915 EDT\",\"192.168.252.1\",54167\n",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [
+        {
+          "_time": "2026-10-16 11:48:01.915 EDT",
+          "src_ip": "192.168.252.1",
+          "src_port": "54167"
+        }
+      ],
+      "row_count": 1
+    },
+    {
+      "case": {
+        "case": "d5_positive",
+        "start": 1792165682.049341,
+        "end": 1792165682.0790348,
+        "expected_min_rows": 1
+      },
+      "stanza": "D5_unauth_master_action",
+      "earliest": 1792165681,
+      "latest": 1792165684,
+      "query": "index=c09 earliest=1792165681 latest=1792165684 (event=lobby_create OR event=join_handoff) authenticated=false | table _time, event, src_ip, src_port, lobby_id",
+      "returncode": 0,
+      "stdout": "\"_time\",event,\"src_ip\",\"src_port\",\"lobby_id\"\n\"2026-10-16 11:48:02.094 EDT\",\"lobby_create\",\"192.168.252.1\",57011,8\n",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [
+        {
+          "_time": "2026-10-16 11:48:02.094 EDT",
+          "event": "lobby_create",
+          "src_ip": "192.168.252.1",
+          "src_port": "57011",
+          "lobby_id": "8"
+        }
+      ],
+      "row_count": 1
+    },
+    {
+      "case": {
+        "case": "d6_positive",
+        "start": 1792165682.079283,
+        "end": 1792165682.455924,
+        "expected_min_rows": 1
+      },
+      "stanza": "D6_lobby_creation_burst",
+      "earliest": 1792165681,
+      "latest": 1792165684,
+      "query": "index=c09 earliest=1792165681 latest=1792165684 event=lobby_create | bin _time span=1m | stats count by _time, src_ip | where count >= 10",
+      "returncode": 0,
+      "stdout": "\"_time\",\"src_ip\",count\n\"2026-10-16 11:48:00.000 EDT\",\"192.168.252.1\",16\n",
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+      "rows": [
+        {
+          "_time": "2026-10-16 11:48:00.000 EDT",
+          "src_ip": "192.168.252.1",
+          "count": "16"
+        }
+      ],
+      "row_count": 1
+    }
+  ],
+  "triggered_alerts": {
+    "query": "| rest /servicesNS/-/c09_detections/alerts/fired_alerts | table title triggered_alert_count",
+    "returncode": 0,
+    "stdout": "title,\"triggered_alert_count\"\n\"-\",2\n\"D3b_concurrent_sessions\",1\n\"D6_lobby_creation_burst\",1\n",
+    "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+    "rows": [
+      {
+        "title": "-",
+        "triggered_alert_count": "2"
+      },
+      {
+        "title": "D3b_concurrent_sessions",
+        "triggered_alert_count": "1"
+      },
+      {
+        "title": "D6_lobby_creation_burst",
+        "triggered_alert_count": "1"
+      }
+    ]
+  },
+  "ingestion": {
+    "query": "index=c09 earliest=1792164600 latest=now | eval ingest_delay_s=_indextime-_time | stats count min(ingest_delay_s) as min_delay max(ingest_delay_s) as max_delay avg(ingest_delay_s) as avg_delay latest(_time) as latest_event by event",
+    "returncode": 0,
+    "stdout": "event,count,\"min_delay\",\"max_delay\",\"avg_delay\",\"latest_event\"\nauth,27,\"-0.587\",\"0.378\",\"0.1144814756181505\",\"1792165682.119\"\nhello,16,\"-0.584\",\"0.401\",\"0.04512500762939453\",\"1792165682.117\"\n\"join_handoff\",3,\"-0.476\",\"0.259\",\"-0.1853333314259847\",\"1792165265.476\"\n\"lobby_create\",23,\"-0.590\",\"1.386\",\"-0.1941739165264627\",\"1792165682.471\"\n\"lobby_list\",3,\"-0.474\",\"0.261\",\"-0.18066668510437012\",\"1792165265.474\"\n\"player_join\",4,\"0.085\",\"1.633\",\"0.8305000066757202\",\"1792165681.915\"\n\"player_timeout\",4,\"-0.598\",\"2.013\",\"0.1627500057220459\",\"1792165692.345\"\n\"server_start\",2,\"-0.210\",\"0.397\",\"0.09350001811981201\",\"1792164852.603\"\n",
+    "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n",
+    "rows": [
+      {
+        "event": "auth",
+        "count": "27",
+        "min_delay": "-0.587",
+        "max_delay": "0.378",
+        "avg_delay": "0.1144814756181505",
+        "latest_event": "1792165682.119"
+      },
+      {
+        "event": "hello",
+        "count": "16",
+        "min_delay": "-0.584",
+        "max_delay": "0.401",
+        "avg_delay": "0.04512500762939453",
+        "latest_event": "1792165682.117"
+      },
+      {
+        "event": "join_handoff",
+        "count": "3",
+        "min_delay": "-0.476",
+        "max_delay": "0.259",
+        "avg_delay": "-0.1853333314259847",
+        "latest_event": "1792165265.476"
+      },
+      {
+        "event": "lobby_create",
+        "count": "23",
+        "min_delay": "-0.590",
+        "max_delay": "1.386",
+        "avg_delay": "-0.1941739165264627",
+        "latest_event": "1792165682.471"
+      },
+      {
+        "event": "lobby_list",
+        "count": "3",
+        "min_delay": "-0.474",
+        "max_delay": "0.261",
+        "avg_delay": "-0.18066668510437012",
+        "latest_event": "1792165265.474"
+      },
+      {
+        "event": "player_join",
+        "count": "4",
+        "min_delay": "0.085",
+        "max_delay": "1.633",
+        "avg_delay": "0.8305000066757202",
+        "latest_event": "1792165681.915"
+      },
+      {
+        "event": "player_timeout",
+        "count": "4",
+        "min_delay": "-0.598",
+        "max_delay": "2.013",
+        "avg_delay": "0.1627500057220459",
+        "latest_event": "1792165692.345"
+      },
+      {
+        "event": "server_start",
+        "count": "2",
+        "min_delay": "-0.210",
+        "max_delay": "0.397",
+        "avg_delay": "0.09350001811981201",
+        "latest_event": "1792164852.603"
+      }
+    ]
+  }
+}

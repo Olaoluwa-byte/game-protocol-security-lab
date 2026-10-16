@@ -1,0 +1,28 @@
+{
+  "captured_epoch": 1792166545.056699,
+  "metadata": {
+    "/var/backups/c09-alerts-01-20261016": {
+      "mode": "0o700",
+      "owner": "root",
+      "size": 4096
+    },
+    "/var/backups/c09-alerts-01-20261016/before.tgz": {
+      "mode": "0o600",
+      "owner": "root",
+      "size": 1217
+    },
+    "/opt/splunk/etc/apps/c09_detections": {
+      "mode": "0o750",
+      "owner": "splunk",
+      "size": 4096
+    },
+    "/opt/splunk/etc/apps/c09_detections/local/savedsearches.conf": {
+      "mode": "0o640",
+      "owner": "splunk",
+      "size": 4557
+    }
+  },
+  "errors_after_1140": [],
+  "service": "active\n",
+  "web_http": "200"
+}

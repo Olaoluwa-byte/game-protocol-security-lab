@@ -1,0 +1,124 @@
+{
+  "captured_epoch": 1792166485.8898375,
+  "alerts": {
+    "D1_password_guessing": {
+      "query": "| rest /servicesNS/-/c09_detections/alerts/fired_alerts/D1_password_guessing | table title sid trigger_time severity actions",
+      "returncode": 0,
+      "rows": [
+        {
+          "title": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD5ab95ce584495b74f_at_1792165800_29_1792165801",
+          "sid": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD5ab95ce584495b74f_at_1792165800_29",
+          "trigger_time": "1792165801",
+          "severity": "4",
+          "actions": ""
+        }
+      ],
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n"
+    },
+    "D2_password_spraying": {
+      "query": "| rest /servicesNS/-/c09_detections/alerts/fired_alerts/D2_password_spraying | table title sid trigger_time severity actions",
+      "returncode": 0,
+      "rows": [
+        {
+          "title": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD5c39f013d8907d736_at_1792165800_33_1792165802",
+          "sid": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD5c39f013d8907d736_at_1792165800_33",
+          "trigger_time": "1792165802",
+          "severity": "4",
+          "actions": ""
+        }
+      ],
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n"
+    },
+    "D3a_multi_endpoint_auth": {
+      "query": "| rest /servicesNS/-/c09_detections/alerts/fired_alerts/D3a_multi_endpoint_auth | table title sid trigger_time severity actions",
+      "returncode": 0,
+      "rows": [
+        {
+          "title": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD59d264e3b8d5bcb34_at_1792166400_50_1792166400",
+          "sid": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD59d264e3b8d5bcb34_at_1792166400_50",
+          "trigger_time": "1792166400",
+          "severity": "3",
+          "actions": ""
+        },
+        {
+          "title": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD59d264e3b8d5bcb34_at_1792165800_31_1792165802",
+          "sid": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD59d264e3b8d5bcb34_at_1792165800_31",
+          "trigger_time": "1792165802",
+          "severity": "3",
+          "actions": ""
+        }
+      ],
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n"
+    },
+    "D3b_concurrent_sessions": {
+      "query": "| rest /servicesNS/-/c09_detections/alerts/fired_alerts/D3b_concurrent_sessions | table title sid trigger_time severity actions",
+      "returncode": 0,
+      "rows": [
+        {
+          "title": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD56b2baf0280d6a188_at_1792166400_52_1792166400",
+          "sid": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD56b2baf0280d6a188_at_1792166400_52",
+          "trigger_time": "1792166400",
+          "severity": "3",
+          "actions": ""
+        },
+        {
+          "title": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD56b2baf0280d6a188_at_1792165800_32_1792165802",
+          "sid": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD56b2baf0280d6a188_at_1792165800_32",
+          "trigger_time": "1792165802",
+          "severity": "3",
+          "actions": ""
+        },
+        {
+          "title": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD56b2baf0280d6a188_at_1792165500_15_1792165501",
+          "sid": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD56b2baf0280d6a188_at_1792165500_15",
+          "trigger_time": "1792165501",
+          "severity": "3",
+          "actions": ""
+        }
+      ],
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n"
+    },
+    "D4_unauth_game_join": {
+      "query": "| rest /servicesNS/-/c09_detections/alerts/fired_alerts/D4_unauth_game_join | table title sid trigger_time severity actions",
+      "returncode": 0,
+      "rows": [
+        {
+          "title": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD5cb88db8251acc935_at_1792165800_28_1792165801",
+          "sid": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD5cb88db8251acc935_at_1792165800_28",
+          "trigger_time": "1792165801",
+          "severity": "3",
+          "actions": ""
+        }
+      ],
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n"
+    },
+    "D5_unauth_master_action": {
+      "query": "| rest /servicesNS/-/c09_detections/alerts/fired_alerts/D5_unauth_master_action | table title sid trigger_time severity actions",
+      "returncode": 0,
+      "rows": [
+        {
+          "title": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD530617fe25cf2e9dd_at_1792165800_30_1792165801",
+          "sid": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD530617fe25cf2e9dd_at_1792165800_30",
+          "trigger_time": "1792165801",
+          "severity": "4",
+          "actions": ""
+        }
+      ],
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n"
+    },
+    "D6_lobby_creation_burst": {
+      "query": "| rest /servicesNS/-/c09_detections/alerts/fired_alerts/D6_lobby_creation_burst | table title sid trigger_time severity actions",
+      "returncode": 0,
+      "rows": [
+        {
+          "title": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD55e31ebc9e4ea893d_at_1792165740_25_1792165741",
+          "sid": "scheduler__nobody_YzA5X2RldGVjdGlvbnM__RMD55e31ebc9e4ea893d_at_1792165740_25",
+          "trigger_time": "1792165741",
+          "severity": "3",
+          "actions": ""
+        }
+      ],
+      "stderr": "WARNING: Server Certificate Hostname Validation is disabled. Please see server.conf/[sslConfig]/cliVerifyServerName for details.\n"
+    }
+  }
+}

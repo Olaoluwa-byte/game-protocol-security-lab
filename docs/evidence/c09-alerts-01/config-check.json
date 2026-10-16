@@ -1,0 +1,8 @@
+{
+  "returncode": 1,
+  "invalid_keys": [
+    "\t\tInvalid key in stanza [ENTRA - App Credential Added Outside Baseline] in /opt/splunk/etc/apps/search/local/savedsearches.conf, line 7: alert_type (value: number of events).",
+    "\t\tInvalid key in stanza [ENTRA - App Credential Added Outside Baseline] in /opt/splunk/etc/apps/search/local/savedsearches.conf, line 8: alert_comparator (value: greater than).",
+    "\t\tInvalid key in stanza [ENTRA - App Credential Added Outside Baseline] in /opt/splunk/etc/apps/search/local/savedsearches.conf, line 9: alert_threshold (value: 0)."
+  ]
+}
